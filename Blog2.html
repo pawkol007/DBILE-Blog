@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-Blog Ekipy</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+        }
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .button {
+            display: block;
+            width: 200px;
+            margin: 10px auto;
+            padding: 10px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .section {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        .post, .image {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ff9800;
+            position: relative;
+        }
+        .reactions button, .pin {
+            margin-right: 5px;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .like { background: #4CAF50; color: white; }
+        .dislike { background: #f44336; color: white; }
+        .pin { background: #ffeb3b; color: black; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mini-Blog Ekipy</h1>
+    </header>
+    
+    <main>
+        <a href="#" class="button" onclick="showSection('postsSection')">Posty</a>
+        <a href="#" class="button" onclick="showSection('imagesSection')">Zdjęcia</a>
+        <a href="#" class="button" onclick="showSection('membersSection')">Członkowie</a>
+        
+        <section id="postsSection" class="section">
+            <h2>Posty</h2>
+            <div id="posts"></div>
+            <h3>Dodaj nowy wpis:</h3>
+            <input type="text" id="author" placeholder="Twoje imię">
+            <input type="text" id="title" placeholder="Tytuł">
+            <textarea id="content" placeholder="Treść wpisu"></textarea>
+            <button onclick="addPost()">Dodaj wpis</button>
+        </section>
+        
+        <section id="imagesSection" class="section">
+            <h2>Zdjęcia</h2>
+            <div id="images"></div>
+            <h3>Dodaj zdjęcie:</h3>
+            <input type="text" id="imageAuthor" placeholder="Twoje imię">
+            <input type="file" id="imageUpload">
+            <button onclick="addImage()">Dodaj zdjęcie</button>
+        </section>
+        
+        <section id="membersSection" class="section">
+            <h2>Członkowie grupy DBILE</h2>
+            <p>Lista członków wkrótce!</p>
+        </section>
+    </main>
+    
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        function addPost() {
+            let author = document.getElementById('author').value;
+            let title = document.getElementById('title').value;
+            let content = document.getElementById('content').value;
+            if (!author || !title || !content) return;
+            let postContainer = document.createElement('section');
+            postContainer.classList.add('post');
+            postContainer.innerHTML = `
+                <h2>${title}</h2>
+                <p>${content}</p>
+                <p><strong>Autor:</strong> ${author} | <strong>Data:</strong> ${new Date().toLocaleDateString()}</p>
+                <button class="pin" onclick="pinPost(this)">📌 Przypnij</button>
+                <div class="reactions">
+                    <button class="like" onclick="react(this, 'like')">👍 <span>0</span></button>
+                    <button class="dislike" onclick="react(this, 'dislike')">👎 <span>0</span></button>
+                </div>
+            `;
+            document.getElementById('posts').prepend(postContainer);
+        }
+        
+        function addImage() {
+            let author = document.getElementById('imageAuthor').value;
+            let file = document.getElementById('imageUpload').files[0];
+            if (!author || !file) return;
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let imgContainer = document.createElement('section');
+                imgContainer.classList.add('image');
+                imgContainer.innerHTML = `
+                    <p><strong>Autor:</strong> ${author}</p>
+                    <img src="${event.target.result}" style="max-width: 100%; border-radius: 10px;"/>
+                    <button class="pin" onclick="pinPost(this)">📌 Przypnij</button>
+                    <div class="reactions">
+                        <button class="like" onclick="react(this, 'like')">👍 <span>0</span></button>
+                        <button class="dislike" onclick="react(this, 'dislike')">👎 <span>0</span></button>
+                    </div>
+                `;
+                document.getElementById('images').prepend(imgContainer);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function pinPost(button) {
+            let post = button.closest('section');
+            post.style.border = '3px solid gold';
+            post.style.background = '#fff3cd';
+        }
+        
+        function react(button, type) {
+            let post = button.closest('section');
+            if (post.dataset.reacted) return;
+            let countSpan = button.querySelector('span');
+            countSpan.textContent = parseInt(countSpan.textContent) + 1;
+            post.dataset.reacted = type;
+        }
+    </script>
+</body>
+</html>
